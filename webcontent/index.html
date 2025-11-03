@@ -50,7 +50,35 @@
 
 	<div style="margin-bottom: 15px;">
 		<button id="startBtn">Start Talking</button>
+		<button id="muteBtn" style="display: none; margin-left: 10px; padding: 10px 20px; background: #ffc107; color: black; border: none; border-radius: 3px; cursor: pointer; font-weight: bold;">
+			🔇 Mute
+		</button>
 		<span id="statusMessage" style="margin-left: 20px; color: #e74c3c; font-weight: bold;"></span>
+	</div>
+
+	<!-- Audio Level Indicators -->
+	<div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 5px; display: none;" id="audioLevelsPanel">
+		<h3 style="margin-top: 0;">🎤 Audio Levels</h3>
+
+		<div style="margin-bottom: 15px;">
+			<label style="display: block; margin-bottom: 5px; font-weight: bold;">Your Microphone:</label>
+			<div style="display: flex; align-items: center;">
+				<div class="audio-meter-container">
+					<div id="micAudioLevel" class="audio-meter-bar"></div>
+				</div>
+				<span id="micLevelText" style="margin-left: 10px; min-width: 60px; font-family: monospace;">0%</span>
+			</div>
+		</div>
+
+		<div>
+			<label style="display: block; margin-bottom: 5px; font-weight: bold;">Incoming Audio:</label>
+			<div style="display: flex; align-items: center;">
+				<div class="audio-meter-container">
+					<div id="incAudioLevel" class="audio-meter-bar" style="background: linear-gradient(90deg, #4caf50, #8bc34a, #cddc39);"></div>
+				</div>
+				<span id="incLevelText" style="margin-left: 10px; min-width: 60px; font-family: monospace;">0%</span>
+			</div>
+		</div>
 	</div>
 
 	<div style="margin: 20px 0; padding: 10px; background: #f0f0f0; border-radius: 5px;">

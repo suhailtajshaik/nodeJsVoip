@@ -150,13 +150,34 @@ document.addEventListener('DOMContentLoaded', function () {
 	};
 
 	var startBtn = document.getElementById("startBtn");
+	var muteBtn = document.getElementById("muteBtn");
+	var isMuted = false;
+
 	startBtn.addEventListener('click', function () {
 		if (!currentRoom) {
 			statusMessage.textContent = '⚠️ Please join a room first!';
 			return;
 		}
 		startBtn.style.display = 'none';
+		muteBtn.style.display = 'inline-block';
+		document.getElementById('audioLevelsPanel').style.display = 'block';
 		startTalking();
+	});
+
+	// Mute/Unmute button handler
+	muteBtn.addEventListener('click', function () {
+		isMuted = !isMuted;
+		toggleMute(isMuted);
+
+		if (isMuted) {
+			muteBtn.textContent = '🔊 Unmute';
+			muteBtn.classList.add('muted');
+			document.getElementById('micAudioLevel').classList.add('muted');
+		} else {
+			muteBtn.textContent = '🔇 Mute';
+			muteBtn.classList.remove('muted');
+			document.getElementById('micAudioLevel').classList.remove('muted');
+		}
 	});
 
 	var micaudio = document.getElementById("micaudio");
@@ -167,11 +188,42 @@ document.addEventListener('DOMContentLoaded', function () {
 	var incctx = incaudio.getContext("2d");
 	incctx.fillStyle = "#FF0000";
 
+	// Audio level meter elements
+	var micAudioLevel = document.getElementById("micAudioLevel");
+	var micLevelText = document.getElementById("micLevelText");
+	var incAudioLevel = document.getElementById("incAudioLevel");
+	var incLevelText = document.getElementById("incLevelText");
+
+	// Calculate RMS (Root Mean Square) for audio level
+	function calculateAudioLevel(audioData) {
+		var sum = 0;
+		for (var i = 0; i < audioData.length; i++) {
+			sum += audioData[i] * audioData[i];
+		}
+		var rms = Math.sqrt(sum / audioData.length);
+		// Convert to percentage (0-100), clamped
+		var percentage = Math.min(100, Math.max(0, rms * 100));
+		return percentage;
+	}
+
 	onMicRawAudio = function (audioData, soundcardSampleRate) { //Data right after mic input
 		micctx.clearRect(0, 0, micaudio.width, micaudio.height);
 		for (var i = 0; i < audioData.length; i++) {
 			micctx.fillRect(i, audioData[i] * 100 + 100, 1, 1);
 		}
+
+		// Update microphone audio level meter
+		var level = calculateAudioLevel(audioData);
+		micAudioLevel.style.width = level + '%';
+		micLevelText.textContent = Math.round(level) + '%';
+
+		// Add active class if there's significant audio
+		if (level > 5 && !isMuted) {
+			micAudioLevel.classList.add('active');
+		} else {
+			micAudioLevel.classList.remove('active');
+		}
+
 		return audioData;
 	}
 
@@ -180,6 +232,19 @@ document.addEventListener('DOMContentLoaded', function () {
 		for (var i = 0; i < audioData.length; i++) {
 			incctx.fillRect(i, audioData[i] * 100 + 100, 1, 1);
 		}
+
+		// Update incoming audio level meter
+		var level = calculateAudioLevel(audioData);
+		incAudioLevel.style.width = level + '%';
+		incLevelText.textContent = Math.round(level) + '%';
+
+		// Add active class if there's significant audio
+		if (level > 5) {
+			incAudioLevel.classList.add('active');
+		} else {
+			incAudioLevel.classList.remove('active');
+		}
+
 		return audioData;
 	}
 });
