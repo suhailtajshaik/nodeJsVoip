@@ -53,6 +53,43 @@ var VoipConfig = {
         }
     },
 
+    // Audio Enhancements
+    enhancements: {
+        // Voice Activity Detection (VAD)
+        vad: {
+            enabled: true,
+            // Energy threshold for voice detection (0-1)
+            // Lower = more sensitive, Higher = less sensitive
+            energyThreshold: 0.02,
+            // Frequency threshold (Hz) - voice is typically 85-255 Hz
+            frequencyThreshold: 85,
+            // Number of silent frames before stopping transmission
+            silentFrameThreshold: 30
+        },
+
+        // Noise Suppression
+        noiseSuppression: {
+            enabled: true,
+            // Noise gate threshold (0-1)
+            // Audio below this level is considered noise
+            noiseGateThreshold: 0.01,
+            // Smoothing factor for noise reduction (0-1)
+            smoothingFactor: 0.98
+        },
+
+        // Echo Cancellation
+        echoCancellation: {
+            enabled: true,
+            // Use browser's built-in echo cancellation
+            useBrowserAEC: true
+        },
+
+        // Automatic Gain Control
+        autoGainControl: {
+            enabled: true
+        }
+    },
+
     // UI Settings
     ui: {
         // Show audio visualization
