@@ -1,6 +1,6 @@
 FROM node:20-alpine
 
-LABEL maintainer="rofl256"
+LABEL maintainer="Suhail Taj Shaik"
 
 # Create app directory
 RUN mkdir -p /opt/app
