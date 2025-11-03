@@ -19,6 +19,15 @@ function hasGetUserMedia() {
 	return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
 }
 
+// Room management functions
+function joinRoom(roomName) {
+	socketIO.emit('join-room', roomName);
+}
+
+function leaveRoom() {
+	socketIO.emit('leave-room');
+}
+
 socketIO.on('connect', function (socket) {
 	console.log('socket connected!');
 	socketConnected = true;
@@ -39,8 +48,25 @@ socketIO.on('connect', function (socket) {
 		}
 	});
 
-	socketIO.on('clients', function (cnt) {
-		document.getElementById("clients").textContent = cnt;
+	// Room event handlers
+	socketIO.on('room-joined', function (data) {
+		if (window.onRoomJoined) window.onRoomJoined(data);
+	});
+
+	socketIO.on('room-left', function () {
+		if (window.onRoomLeft) window.onRoomLeft();
+	});
+
+	socketIO.on('user-joined', function (data) {
+		if (window.onUserJoined) window.onUserJoined(data);
+	});
+
+	socketIO.on('user-left', function (data) {
+		if (window.onUserLeft) window.onUserLeft(data);
+	});
+
+	socketIO.on('rooms-list', function (rooms) {
+		if (window.onRoomsList) window.onRoomsList(rooms);
 	});
 });
 
