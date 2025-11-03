@@ -1,11 +1,11 @@
 var socketIO = io();
 
 var soundcardSampleRate = null; //Sample rate from the soundcard (is set at mic access)
-var mySampleRate = 12000; //Samplerate outgoing audio (common: 8000, 12000, 16000, 24000, 32000, 48000)
-var myBitRate = 16; //8,16,32 - outgoing bitrate
-var myMinGain = 3 / 100; //min Audiolvl
+var mySampleRate = VoipConfig.audio.sampleRate; //Samplerate outgoing audio
+var myBitRate = VoipConfig.audio.bitRate; //8,16,32 - outgoing bitrate
+var myMinGain = VoipConfig.audio.minGain; //min Audiolvl
 var micAccessAllowed = false; //Is set to true if user granted access
-var chunkSize = 1024;
+var chunkSize = VoipConfig.audio.chunkSize;
 
 var downSampleWorker = new Worker('./js/voipWorker.js');
 var upSampleWorker = new Worker('./js/voipWorker.js');
@@ -143,7 +143,7 @@ function startTalking() {
 			//Lowpass
 			biquadFilter = context.createBiquadFilter();
 			biquadFilter.type = "lowpass";
-			biquadFilter.frequency.value = 3000;
+			biquadFilter.frequency.value = VoipConfig.processing.lowPassFrequency;
 
 			oscillator.connect(biquadFilter);
 			//oscillator.start();
@@ -155,12 +155,12 @@ function startTalking() {
 
 			//Dynamic Compression
 			dynCompressor = context.createDynamicsCompressor();
-			dynCompressor.threshold.value = -25;
-			dynCompressor.knee.value = 9;
-			dynCompressor.ratio.value = 8;
-			dynCompressor.reduction.value = -20;
-			dynCompressor.attack.value = 0.0;
-			dynCompressor.release.value = 0.25;
+			dynCompressor.threshold.value = VoipConfig.processing.compression.threshold;
+			dynCompressor.knee.value = VoipConfig.processing.compression.knee;
+			dynCompressor.ratio.value = VoipConfig.processing.compression.ratio;
+			dynCompressor.reduction.value = VoipConfig.processing.compression.reduction;
+			dynCompressor.attack.value = VoipConfig.processing.compression.attack;
+			dynCompressor.release.value = VoipConfig.processing.compression.release;
 
 			biquadFilter.connect(dynCompressor); //biquadFilter infront
 			dynCompressor.connect(node);

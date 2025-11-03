@@ -26,8 +26,33 @@ Now connect to https://myserverip
 `sudo docker build -t nodejsvoip .`
 now run the container from the image you have just created. (use the command from above and change the image name)
 
+# Audio Quality Configuration
+
+You can now customize audio quality settings by editing `webcontent/js/config.js`. This allows you to balance between audio quality and bandwidth usage.
+
+## Quality Presets
+
+**Low Bandwidth (Default)**
+- Sample Rate: 16000 Hz (upgraded from 12000 Hz)
+- Bit Depth: 16-bit
+- Best for: Limited bandwidth connections
+
+**High Quality**
+- Sample Rate: 48000 Hz
+- Bit Depth: 16-bit
+- Best for: Local networks or high-speed connections
+
+**Customizable Settings:**
+- Sample rate (8000, 12000, 16000, 24000, 32000, 48000 Hz)
+- Bit depth (8, 16, 32-bit)
+- Audio processing (lowpass filter, dynamic compression)
+- Minimum gain threshold
+
+Edit `webcontent/js/config.js` to adjust these settings and reload the page.
+
 # Roadmap
-* improve sound quallity by implementing opus
+* ✅ Improved sound quality with configurable audio settings
+* Add Opus codec support (foundation laid with @geut/opus library)
 
 # Audiopipeline Details
 
