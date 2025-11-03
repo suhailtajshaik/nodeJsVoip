@@ -1,8 +1,27 @@
-/* CONFIG */
-var SSLPORT = 443; //Default 443
-var HTTPPORT = 80; //Default 80 (Only used to redirect to SSL port)
-var privateKeyPath = "./cert/key.pem"; //Default "./cert/key.pem"
-var certificatePath = "./cert/cert.pem"; //Default "./cert/cert.pem"
+// Load environment variables from .env file
+require('dotenv').config();
+
+/* CONFIG - All values can be overridden with environment variables */
+var SSLPORT = process.env.SSL_PORT || 443; //Default 443
+var HTTPPORT = process.env.HTTP_PORT || 80; //Default 80 (Only used to redirect to SSL port)
+var privateKeyPath = process.env.PRIVATE_KEY_PATH || "./cert/key.pem"; //Default "./cert/key.pem"
+var certificatePath = process.env.CERTIFICATE_PATH || "./cert/cert.pem"; //Default "./cert/cert.pem"
+var corsOrigin = process.env.CORS_ORIGIN || "*"; //Default allow all origins
+var pingTimeout = parseInt(process.env.PING_TIMEOUT) || 60000; //Default 60 seconds
+var pingInterval = parseInt(process.env.PING_INTERVAL) || 25000; //Default 25 seconds
+var nodeEnv = process.env.NODE_ENV || 'production';
+var debug = process.env.DEBUG === 'true';
+
+// Log configuration on startup
+if (debug) {
+	console.log('Configuration:');
+	console.log('  SSL_PORT:', SSLPORT);
+	console.log('  HTTP_PORT:', HTTPPORT);
+	console.log('  PRIVATE_KEY_PATH:', privateKeyPath);
+	console.log('  CERTIFICATE_PATH:', certificatePath);
+	console.log('  CORS_ORIGIN:', corsOrigin);
+	console.log('  NODE_ENV:', nodeEnv);
+}
 
 /* END CONFIG */
 
@@ -51,11 +70,11 @@ try {
 
 var io  = require('socket.io')(server, {
     cors: {
-        origin: "*",
+        origin: corsOrigin,
         methods: ["GET", "POST"]
     },
-    pingTimeout: 60000,
-    pingInterval: 25000
+    pingTimeout: pingTimeout,
+    pingInterval: pingInterval
 });
 
 // Redirect from http to https with error handling
