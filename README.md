@@ -50,9 +50,39 @@ You can now customize audio quality settings by editing `webcontent/js/config.js
 
 Edit `webcontent/js/config.js` to adjust these settings and reload the page.
 
+# Room/Channel Support
+
+The application now supports multiple conversation rooms! Users can create or join specific rooms to have private conversations.
+
+## How to Use Rooms
+
+1. **Join a Room**: Enter a room name (e.g., "lobby", "team-chat") and click "Join Room"
+2. **Start Talking**: Once in a room, click "Start Talking" to begin voice communication
+3. **Room Privacy**: You can only hear users in the same room as you
+4. **Leave Room**: Click "Leave Room" to exit the current room
+5. **View Active Rooms**: See all active rooms and their user counts in real-time
+
+## Room Features
+
+- **Auto-Create**: Rooms are automatically created when the first user joins
+- **Auto-Delete**: Empty rooms are automatically deleted when the last user leaves
+- **Real-time Updates**: See live updates of users joining/leaving rooms
+- **Multi-Room Support**: Host unlimited simultaneous rooms
+- **User Isolation**: Audio is only transmitted to users in the same room
+
+## Use Cases
+
+- **Team Meetings**: Different teams can have separate voice channels
+- **Gaming**: Create rooms for different game sessions
+- **Study Groups**: Students can create dedicated study rooms
+- **Social Hangouts**: Friends can create private chat rooms
+
 # Roadmap
 * ✅ Improved sound quality with configurable audio settings
+* ✅ Room/channel support for multi-room conversations
 * Add Opus codec support (foundation laid with @geut/opus library)
+* Add voice activity detection (VAD)
+* Implement echo cancellation
 
 # Audiopipeline Details
 

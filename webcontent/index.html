@@ -14,8 +14,40 @@
 
 <body>
 	<h1>NodeJsVoip</h1>
-	<button id="startBtn">Start Talking</button>
-	<span style="margin-left: 20px;">Connected clients: <span id="clients"></span></span>
+
+	<!-- Room Selection Panel -->
+	<div style="margin: 20px 0; padding: 15px; background: #e8f4f8; border-radius: 5px; border: 2px solid #4a90e2;">
+		<h3 style="margin-top: 0;">🏠 Room/Channel Selection</h3>
+
+		<div style="margin-bottom: 15px;">
+			<label for="roomName" style="font-weight: bold;">Room Name:</label>
+			<input type="text" id="roomName" placeholder="Enter room name (e.g., lobby)"
+				style="padding: 5px 10px; margin: 0 10px; border: 1px solid #ccc; border-radius: 3px; width: 200px;">
+			<button id="joinRoomBtn" style="padding: 5px 15px; background: #4a90e2; color: white; border: none; border-radius: 3px; cursor: pointer;">
+				Join Room
+			</button>
+			<button id="leaveRoomBtn" style="padding: 5px 15px; background: #e74c3c; color: white; border: none; border-radius: 3px; cursor: pointer; display: none;">
+				Leave Room
+			</button>
+		</div>
+
+		<div id="currentRoomInfo" style="display: none; padding: 10px; background: #d4edda; border-radius: 3px; margin-bottom: 10px;">
+			<strong>Current Room:</strong> <span id="currentRoomName"></span> |
+			<strong>Users:</strong> <span id="roomUsersCount">0</span>
+		</div>
+
+		<div style="margin-top: 10px;">
+			<strong>Available Rooms:</strong>
+			<div id="roomsList" style="margin-top: 5px; font-size: 14px; color: #555;">
+				No active rooms
+			</div>
+		</div>
+	</div>
+
+	<div style="margin-bottom: 15px;">
+		<button id="startBtn">Start Talking</button>
+		<span id="statusMessage" style="margin-left: 20px; color: #e74c3c; font-weight: bold;"></span>
+	</div>
 
 	<div style="margin: 20px 0; padding: 10px; background: #f0f0f0; border-radius: 5px;">
 		<h3 style="margin-top: 0;">Audio Quality Settings</h3>
