@@ -1,4 +1,9 @@
 document.addEventListener('DOMContentLoaded', function () {
+	// Display current configuration
+	document.getElementById("sampleRate").textContent = VoipConfig.audio.sampleRate;
+	document.getElementById("bitRate").textContent = VoipConfig.audio.bitRate;
+	document.getElementById("chunkSize").textContent = VoipConfig.audio.chunkSize;
+
 	var startBtn = document.getElementById("startBtn");
 	startBtn.addEventListener('click', function () {
 		startBtn.style.display = 'none';
