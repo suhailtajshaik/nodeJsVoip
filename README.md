@@ -77,9 +77,55 @@ The application now supports multiple conversation rooms! Users can create or jo
 - **Study Groups**: Students can create dedicated study rooms
 - **Social Hangouts**: Friends can create private chat rooms
 
+# Error Handling & Reliability
+
+The application now includes comprehensive error handling and automatic recovery features:
+
+## Server-Side Error Handling
+
+- **SSL Certificate Validation**: Graceful handling of missing or invalid SSL certificates with helpful error messages
+- **Port Conflict Detection**: Clear error messages if ports are already in use
+- **Graceful Shutdown**: Proper cleanup of connections on server shutdown (Ctrl+C)
+- **Error Logging**: Detailed logging of connection and socket errors
+- **Exception Handling**: Catches uncaught exceptions and unhandled promise rejections
+
+## Client-Side Error Handling
+
+### Automatic Reconnection
+- **Infinite Retry**: Automatically attempts to reconnect if connection is lost
+- **Exponential Backoff**: Starts at 1 second, increases up to 5 seconds between attempts
+- **Visual Feedback**: Connection status indicator shows current state (Connected, Disconnected, Reconnecting, etc.)
+
+### Connection Status Indicator
+- 🟢 **Connected**: Normal operation
+- 🟡 **Disconnected**: Temporary disconnection
+- 🟠 **Reconnecting**: Attempting to reconnect (shows attempt number)
+- 🔴 **Error/Failed**: Connection error or failed to reconnect
+- ⚫ **Server Shutdown**: Server is shutting down
+
+### Microphone Error Handling
+Provides specific error messages for common microphone issues:
+- **Permission Denied**: Guides user to allow microphone access
+- **No Microphone Found**: Prompts user to connect a microphone
+- **Device Busy**: Notifies if microphone is used by another application
+- **Browser Unsupported**: Suggests using a modern browser
+
+### Configuration
+All reconnection settings can be customized in `webcontent/js/config.js`:
+```javascript
+network: {
+    reconnection: true,
+    reconnectionAttempts: Infinity,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 5000,
+    timeout: 20000
+}
+```
+
 # Roadmap
 * ✅ Improved sound quality with configurable audio settings
 * ✅ Room/channel support for multi-room conversations
+* ✅ Better error handling with automatic reconnection
 * Add Opus codec support (foundation laid with @geut/opus library)
 * Add voice activity detection (VAD)
 * Implement echo cancellation

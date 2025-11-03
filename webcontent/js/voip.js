@@ -1,4 +1,11 @@
-var socketIO = io();
+// Initialize Socket.IO with reconnection configuration
+var socketIO = io({
+	reconnection: VoipConfig.network.reconnection,
+	reconnectionAttempts: VoipConfig.network.reconnectionAttempts,
+	reconnectionDelay: VoipConfig.network.reconnectionDelay,
+	reconnectionDelayMax: VoipConfig.network.reconnectionDelayMax,
+	timeout: VoipConfig.network.timeout
+});
 
 var soundcardSampleRate = null; //Sample rate from the soundcard (is set at mic access)
 var mySampleRate = VoipConfig.audio.sampleRate; //Samplerate outgoing audio
@@ -31,6 +38,9 @@ function leaveRoom() {
 socketIO.on('connect', function (socket) {
 	console.log('socket connected!');
 	socketConnected = true;
+	if (window.onConnectionStatusChange) {
+		window.onConnectionStatusChange('connected', 'Connected');
+	}
 
 	socketIO.on('d', function (data) {
 		if (micAccessAllowed) {
@@ -70,9 +80,54 @@ socketIO.on('connect', function (socket) {
 	});
 });
 
-socketIO.on('disconnect', function () {
-	console.log('socket disconnected!');
+socketIO.on('disconnect', function (reason) {
+	console.log('Socket disconnected. Reason:', reason);
 	socketConnected = false;
+	if (window.onConnectionStatusChange) {
+		window.onConnectionStatusChange('disconnected', reason);
+	}
+});
+
+// Reconnection event handlers
+socketIO.on('connect_error', function (error) {
+	console.error('Connection error:', error.message);
+	if (window.onConnectionStatusChange) {
+		window.onConnectionStatusChange('error', 'Connection error: ' + error.message);
+	}
+});
+
+socketIO.on('reconnect_attempt', function (attemptNumber) {
+	console.log('Reconnection attempt:', attemptNumber);
+	if (window.onConnectionStatusChange) {
+		window.onConnectionStatusChange('reconnecting', 'Attempt ' + attemptNumber);
+	}
+});
+
+socketIO.on('reconnect', function (attemptNumber) {
+	console.log('Reconnected successfully after', attemptNumber, 'attempts');
+	socketConnected = true;
+	if (window.onConnectionStatusChange) {
+		window.onConnectionStatusChange('connected', 'Reconnected');
+	}
+});
+
+socketIO.on('reconnect_error', function (error) {
+	console.error('Reconnection error:', error.message);
+});
+
+socketIO.on('reconnect_failed', function () {
+	console.error('Reconnection failed after all attempts');
+	if (window.onConnectionStatusChange) {
+		window.onConnectionStatusChange('failed', 'Could not reconnect');
+	}
+});
+
+// Handle server shutdown
+socketIO.on('server-shutdown', function (data) {
+	console.warn('Server is shutting down:', data.message);
+	if (window.onConnectionStatusChange) {
+		window.onConnectionStatusChange('shutdown', data.message);
+	}
 });
 
 downSampleWorker.addEventListener('message', function (e) {
@@ -194,10 +249,37 @@ function startTalking() {
 			node.connect(context.destination);
 		}).catch(function (err) {
 			console.error('Error accessing microphone:', err);
-			alert('Error accessing microphone: ' + err.message);
+
+			var errorMessage = 'Could not access your microphone. ';
+
+			// Provide specific error messages based on error type
+			if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+				errorMessage += 'You denied microphone access. Please allow microphone access in your browser settings and try again.';
+			} else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+				errorMessage += 'No microphone found. Please connect a microphone and try again.';
+			} else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+				errorMessage += 'Your microphone is already in use by another application. Please close other applications using the microphone and try again.';
+			} else if (err.name === 'OverconstrainedError') {
+				errorMessage += 'No microphone matching the requirements was found.';
+			} else if (err.name === 'TypeError') {
+				errorMessage += 'There was an error with the microphone configuration.';
+			} else {
+				errorMessage += err.message;
+			}
+
+			alert(errorMessage);
+
+			// Show error in status message
+			if (window.onMicrophoneError) {
+				window.onMicrophoneError(errorMessage);
+			}
 		});
 	} else {
-		alert('getUserMedia() is not supported in your browser');
+		var message = 'Your browser does not support microphone access. Please use a modern browser like Chrome, Firefox, or Edge.';
+		alert(message);
+		if (window.onMicrophoneError) {
+			window.onMicrophoneError(message);
+		}
 	}
 }
 
