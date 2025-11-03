@@ -161,7 +161,22 @@ function startTalking() {
 	if (hasGetUserMedia()) {
 		var context = new (window.AudioContext || window.webkitAudioContext)();
 		soundcardSampleRate = context.sampleRate;
-		navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+
+		// Configure audio constraints with enhancements
+		var audioConstraints = {
+			audio: {
+				echoCancellation: VoipConfig.enhancements.echoCancellation.enabled &&
+				                  VoipConfig.enhancements.echoCancellation.useBrowserAEC,
+				noiseSuppression: VoipConfig.enhancements.noiseSuppression.enabled,
+				autoGainControl: VoipConfig.enhancements.autoGainControl.enabled,
+				sampleRate: { ideal: soundcardSampleRate },
+				channelCount: { ideal: 1 }
+			}
+		};
+
+		console.log('Audio constraints:', audioConstraints);
+
+		navigator.mediaDevices.getUserMedia(audioConstraints).then(function (stream) {
 			micAccessAllowed = true;
 			var liveSource = context.createMediaStreamSource(stream);
 
@@ -181,7 +196,7 @@ function startTalking() {
 				var inData = e.inputBuffer.getChannelData(0);
 				var outData = e.outputBuffer.getChannelData(0);
 
-				inData = onMicRawAudio(inData, soundcardSampleRate); //API Function to change audio data 
+				inData = onMicRawAudio(inData, soundcardSampleRate); //API Function to change audio data
 
 				downSampleWorker.postMessage({ //Downsample client mic data
 					"inc": false, //its audio from the client so false
@@ -190,7 +205,9 @@ function startTalking() {
 					"outSampleRate": mySampleRate,
 					"outBitRate": myBitRate,
 					"minGain": myMinGain,
-					"outChunkSize": chunkSize
+					"outChunkSize": chunkSize,
+					"vadConfig": VoipConfig.enhancements.vad,
+					"noiseConfig": VoipConfig.enhancements.noiseSuppression
 				});
 
 				var allSilence = true;

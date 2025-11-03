@@ -157,6 +157,114 @@ You can now customize audio quality settings by editing `webcontent/js/config.js
 
 Edit `webcontent/js/config.js` to adjust these settings and reload the page.
 
+# Audio Enhancements
+
+The application includes advanced audio processing features to improve voice quality and reduce background noise:
+
+## Features
+
+### 1. **Echo Cancellation (AEC)**
+- Uses browser's built-in Acoustic Echo Cancellation
+- Automatically enabled by default
+- Reduces audio feedback and echo during conversations
+- Configured via `VoipConfig.enhancements.echoCancellation`
+
+### 2. **Noise Suppression**
+- Dual-layer approach:
+  - **Browser-level**: Uses browser's built-in noise suppression (enabled by default)
+  - **Custom Noise Gate**: Additional noise gating with configurable threshold
+- Reduces background noise like keyboard clicks, fan noise, etc.
+- Smoothing factor prevents abrupt audio cutoff
+- Configured via `VoipConfig.enhancements.noiseSuppression`
+
+### 3. **Voice Activity Detection (VAD)**
+- Automatically detects when you're speaking vs. silent
+- Reduces bandwidth by not transmitting silence
+- Dual-threshold detection:
+  - **Energy Threshold**: RMS-based voice energy detection
+  - **Frequency Threshold**: Zero-crossing rate for frequency content analysis
+- Configurable hangover time to avoid cutting off end of speech
+- Configured via `VoipConfig.enhancements.vad`
+
+### 4. **Automatic Gain Control (AGC)**
+- Uses browser's built-in Auto Gain Control
+- Automatically adjusts microphone volume for consistent levels
+- Prevents audio from being too quiet or too loud
+- Configured via `VoipConfig.enhancements.autoGainControl`
+
+## Configuration
+
+All audio enhancements can be customized in `webcontent/js/config.js`:
+
+```javascript
+enhancements: {
+    // Voice Activity Detection
+    vad: {
+        enabled: true,               // Enable/disable VAD
+        energyThreshold: 0.02,       // RMS energy threshold (0-1)
+        frequencyThreshold: 85,      // Zero-crossing rate threshold
+        silentFrameThreshold: 30     // Frames of silence before stopping transmission
+    },
+
+    // Noise Suppression
+    noiseSuppression: {
+        enabled: true,               // Enable browser + custom noise suppression
+        noiseGateThreshold: 0.01,    // Custom noise gate threshold (0-1)
+        smoothingFactor: 0.98        // Smoothing to avoid abrupt cutoff (0-1)
+    },
+
+    // Echo Cancellation
+    echoCancellation: {
+        enabled: true,               // Enable echo cancellation
+        useBrowserAEC: true          // Use browser's built-in AEC
+    },
+
+    // Automatic Gain Control
+    autoGainControl: {
+        enabled: true                // Enable automatic gain control
+    }
+}
+```
+
+## How It Works
+
+The audio processing pipeline:
+
+1. **Microphone Input** → Raw audio captured from microphone
+2. **Browser Enhancements** → Echo cancellation, noise suppression, AGC applied by browser
+3. **Custom Noise Suppression** → Additional noise gating with smooth transitions
+4. **Voice Activity Detection** → Detects speech vs. silence using energy and frequency analysis
+5. **Compression & Encoding** → Audio is compressed and transmitted only when voice is detected
+
+## Tuning Tips
+
+### For Noisy Environments
+- Increase `noiseGateThreshold` to 0.02-0.05
+- Increase `energyThreshold` to 0.03-0.05
+- Decrease `smoothingFactor` to 0.95 for faster noise suppression
+
+### For Quiet Environments
+- Decrease `noiseGateThreshold` to 0.005
+- Decrease `energyThreshold` to 0.01
+- Keep `smoothingFactor` at 0.98 for smoother audio
+
+### For Better Bandwidth Efficiency
+- Enable VAD (`enabled: true`)
+- Increase `silentFrameThreshold` to 40-50 for longer silence before stopping
+- Lower sample rate in `audio.sampleRate` to 12000 or 16000
+
+### For Best Audio Quality
+- Disable VAD if bandwidth is not a concern
+- Set sample rate to 48000 Hz
+- Enable all browser enhancements
+
+## Browser Compatibility
+
+All features are supported in modern browsers:
+- Chrome/Edge: Full support for all enhancements
+- Firefox: Full support for all enhancements
+- Safari: Limited support (basic echo cancellation and AGC)
+
 # Room/Channel Support
 
 The application now supports multiple conversation rooms! Users can create or join specific rooms to have private conversations.
@@ -234,9 +342,13 @@ network: {
 * ✅ Room/channel support for multi-room conversations
 * ✅ Better error handling with automatic reconnection
 * ✅ Configuration management with environment variables and Docker Compose
+* ✅ Voice activity detection (VAD) with energy and frequency analysis
+* ✅ Echo cancellation using browser's built-in AEC
+* ✅ Advanced noise suppression with custom noise gate
+* ✅ Automatic gain control for consistent audio levels
 * Add Opus codec support (foundation laid with @geut/opus library)
-* Add voice activity detection (VAD)
-* Implement echo cancellation
+* Add user mute/unmute controls
+* Add visual audio level indicators
 
 # Audiopipeline Details
 
