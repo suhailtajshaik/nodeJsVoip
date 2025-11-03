@@ -16,8 +16,7 @@ var steamBuffer = {}; //Buffers incomeing audio
 var oscillator;
 
 function hasGetUserMedia() {
-	return !!(navigator.getUserMedia || navigator.webkitGetUserMedia ||
-		navigator.mozGetUserMedia || navigator.msGetUserMedia);
+	return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
 }
 
 socketIO.on('connect', function (socket) {
@@ -41,7 +40,7 @@ socketIO.on('connect', function (socket) {
 	});
 
 	socketIO.on('clients', function (cnt) {
-		$("#clients").text(cnt);
+		document.getElementById("clients").textContent = cnt;
 	});
 });
 
@@ -79,10 +78,9 @@ upSampleWorker.addEventListener('message', function (e) {
 
 function startTalking() {
 	if (hasGetUserMedia()) {
-		var context = new window.AudioContext || new window.webkitAudioContext;
+		var context = new (window.AudioContext || window.webkitAudioContext)();
 		soundcardSampleRate = context.sampleRate;
-		navigator.getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
-		navigator.getUserMedia({ audio: true }, function (stream) {
+		navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
 			micAccessAllowed = true;
 			var liveSource = context.createMediaStreamSource(stream);
 
@@ -91,6 +89,7 @@ function startTalking() {
 			oscillator.frequency.value = 440; // value in hertz
 
 			// create a ScriptProcessorNode
+			// TODO: Migrate to AudioWorklet in the future (ScriptProcessorNode is deprecated but still functional)
 			if (!context.createScriptProcessor) {
 				node = context.createJavaScriptNode(chunkSize, 1, 1);
 			} else {
@@ -167,8 +166,9 @@ function startTalking() {
 			dynCompressor.connect(node);
 
 			node.connect(context.destination);
-		}, function (err) {
-			console.log(err);
+		}).catch(function (err) {
+			console.error('Error accessing microphone:', err);
+			alert('Error accessing microphone: ' + err.message);
 		});
 	} else {
 		alert('getUserMedia() is not supported in your browser');

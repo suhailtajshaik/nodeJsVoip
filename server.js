@@ -21,7 +21,12 @@ var server = https.createServer({
     cert: certificate
 }, app).listen(SSLPORT);
 
-var io  = require('socket.io').listen(server, { log: false });
+var io  = require('socket.io')(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
 
 // Redirect from http to https
 var http = require('http');
@@ -32,14 +37,14 @@ http.createServer(function (req, res) {
 
 console.log("Webserver & Socketserver running on port: "+SSLPORT+ " and "+ HTTPPORT);
 
-//Handel connections
+//Handle connections
 io.sockets.on('connection', function (socket) {
 	console.log("New user connected:", socket.id);
-	io.emit('clients', io.engine.clientsCount);
+	io.emit('clients', io.sockets.sockets.size);
 
 	socket.on('disconnect', function () {
 		console.log("User disconnected:", socket.id);
-		socket.broadcast.emit('clients', io.engine.clientsCount);
+		socket.broadcast.emit('clients', io.sockets.sockets.size);
 	});
 
 	socket.on('d', function (data) {

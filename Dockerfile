@@ -1,6 +1,6 @@
-FROM node:boron
+FROM node:20-alpine
 
-MAINTAINER rofl256
+LABEL maintainer="rofl256"
 
 # Create app directory
 RUN mkdir -p /opt/app

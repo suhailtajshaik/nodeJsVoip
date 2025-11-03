@@ -1,6 +1,7 @@
-$(document).ready(function () {
-	$("#startBtn").click(function () {
-		$(this).hide();
+document.addEventListener('DOMContentLoaded', function () {
+	var startBtn = document.getElementById("startBtn");
+	startBtn.addEventListener('click', function () {
+		startBtn.style.display = 'none';
 		startTalking();
 	});
 

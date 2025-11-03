@@ -21,8 +21,8 @@
   },
   "homepage": "https://github.com/cracker0dks/nodeJsVoip#readme",
   "dependencies": {
-    "express": "4.x",
-    "socket.io": "^2.3.0"
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
   },
   "preferGlobal": true,
   "private": true
