@@ -9,33 +9,74 @@ var certificatePath = "./cert/cert.pem"; //Default "./cert/cert.pem"
 var fs = require('fs');
 var express = require('express');
 var https = require('https');
+var http = require('http');
 var app = express();
 
 app.use(express.static(__dirname + '/webcontent'));
 
-var privateKey = fs.readFileSync( privateKeyPath );
-var certificate = fs.readFileSync( certificatePath );
+// SSL Certificate loading with error handling
+var privateKey, certificate, server, httpsServer;
 
-var server = https.createServer({
-    key: privateKey,
-    cert: certificate
-}, app).listen(SSLPORT);
+try {
+	privateKey = fs.readFileSync(privateKeyPath);
+	certificate = fs.readFileSync(certificatePath);
+	console.log("SSL certificates loaded successfully");
+
+	httpsServer = https.createServer({
+		key: privateKey,
+		cert: certificate
+	}, app);
+
+	httpsServer.on('error', function(err) {
+		console.error("HTTPS Server Error:", err.message);
+		if (err.code === 'EADDRINUSE') {
+			console.error("Port " + SSLPORT + " is already in use. Please stop the other process or change the port.");
+		}
+		process.exit(1);
+	});
+
+	server = httpsServer.listen(SSLPORT, function() {
+		console.log("HTTPS Server listening on port: " + SSLPORT);
+	});
+
+} catch (err) {
+	console.error("Failed to load SSL certificates:", err.message);
+	console.error("Please ensure certificates exist at:");
+	console.error("  - Private Key: " + privateKeyPath);
+	console.error("  - Certificate: " + certificatePath);
+	console.error("\nYou can generate self-signed certificates with:");
+	console.error("  openssl req -nodes -new -x509 -keyout cert/key.pem -out cert/cert.pem -days 365");
+	process.exit(1);
+}
 
 var io  = require('socket.io')(server, {
     cors: {
         origin: "*",
         methods: ["GET", "POST"]
-    }
+    },
+    pingTimeout: 60000,
+    pingInterval: 25000
 });
 
-// Redirect from http to https
-var http = require('http');
-http.createServer(function (req, res) {
+// Redirect from http to https with error handling
+var httpServer = http.createServer(function (req, res) {
     res.writeHead(301, { "Location": "https://" + req.headers['host'] + ":"+ SSLPORT + "" + req.url });
     res.end();
-}).listen(HTTPPORT);
+});
 
-console.log("Webserver & Socketserver running on port: "+SSLPORT+ " and "+ HTTPPORT);
+httpServer.on('error', function(err) {
+	console.error("HTTP Server Error:", err.message);
+	if (err.code === 'EADDRINUSE') {
+		console.error("Port " + HTTPPORT + " is already in use. Please stop the other process or change the port.");
+	}
+});
+
+httpServer.listen(HTTPPORT, function() {
+	console.log("HTTP redirect server listening on port: " + HTTPPORT);
+});
+
+console.log("Webserver & Socketserver running successfully");
+console.log("HTTPS on port: " + SSLPORT + ", HTTP redirect on port: " + HTTPPORT);
 
 // Room management
 var rooms = {}; // { roomName: { users: [socketId1, socketId2, ...], created: timestamp } }
@@ -57,10 +98,15 @@ function getRoomsInfo() {
 	return roomsInfo;
 }
 
-//Handle connections
+//Handle connections with error handling
 io.sockets.on('connection', function (socket) {
 	console.log("New user connected:", socket.id);
 	socket.currentRoom = null; // Track current room
+
+	// Handle connection errors
+	socket.on('error', function(err) {
+		console.error("Socket error for user", socket.id, ":", err.message);
+	});
 
 	// Send list of available rooms on connection
 	socket.emit('rooms-list', getRoomsInfo());
@@ -192,4 +238,46 @@ io.sockets.on('connection', function (socket) {
 			socket.to(socket.currentRoom).emit('d', data);
 		}
 	});
+});
+
+// Graceful shutdown handling
+function gracefulShutdown() {
+	console.log("\nReceived shutdown signal, closing connections gracefully...");
+
+	// Notify all connected clients
+	io.emit('server-shutdown', { message: 'Server is shutting down' });
+
+	// Close socket.io connections
+	io.close(function() {
+		console.log("Socket.IO connections closed");
+
+		// Close HTTPS server
+		if (server) {
+			server.close(function() {
+				console.log("HTTPS server closed");
+				process.exit(0);
+			});
+		}
+
+		// Force close after 10 seconds
+		setTimeout(function() {
+			console.error("Could not close connections in time, forcefully shutting down");
+			process.exit(1);
+		}, 10000);
+	});
+}
+
+// Handle shutdown signals
+process.on('SIGTERM', gracefulShutdown);
+process.on('SIGINT', gracefulShutdown);
+
+// Handle uncaught exceptions
+process.on('uncaughtException', function(err) {
+	console.error("Uncaught Exception:", err);
+	console.error(err.stack);
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', function(reason, promise) {
+	console.error("Unhandled Rejection at:", promise, "reason:", reason);
 });

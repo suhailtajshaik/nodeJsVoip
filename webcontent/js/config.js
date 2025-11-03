@@ -25,9 +25,15 @@ var VoipConfig = {
 
     // Network Settings
     network: {
-        // Reconnection attempts
-        maxReconnectAttempts: 5,
-        reconnectDelay: 1000 // ms
+        // Reconnection configuration
+        reconnection: true,
+        reconnectionAttempts: Infinity,  // Infinite attempts
+        reconnectionDelay: 1000,         // Start at 1 second
+        reconnectionDelayMax: 5000,      // Max 5 seconds between attempts
+        timeout: 20000,                  // Connection timeout (20 seconds)
+
+        // Show connection status in UI
+        showConnectionStatus: true
     },
 
     // Audio Processing

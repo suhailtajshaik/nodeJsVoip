@@ -4,6 +4,72 @@ document.addEventListener('DOMContentLoaded', function () {
 	document.getElementById("bitRate").textContent = VoipConfig.audio.bitRate;
 	document.getElementById("chunkSize").textContent = VoipConfig.audio.chunkSize;
 
+	// Connection status indicator
+	var connectionStatus = document.getElementById("connectionStatus");
+
+	// Handle connection status changes
+	window.onConnectionStatusChange = function (status, message) {
+		var statusText = '';
+		var bgColor = '';
+		var textColor = 'white';
+
+		switch (status) {
+			case 'connected':
+				statusText = '● Connected';
+				bgColor = '#28a745'; // Green
+				break;
+			case 'disconnected':
+				statusText = '● Disconnected';
+				bgColor = '#ffc107'; // Yellow
+				textColor = 'black';
+				break;
+			case 'reconnecting':
+				statusText = '● Reconnecting... (' + message + ')';
+				bgColor = '#ff9800'; // Orange
+				break;
+			case 'error':
+				statusText = '● Error';
+				bgColor = '#dc3545'; // Red
+				break;
+			case 'failed':
+				statusText = '● Connection Failed';
+				bgColor = '#dc3545'; // Red
+				break;
+			case 'shutdown':
+				statusText = '● Server Shutdown';
+				bgColor = '#6c757d'; // Gray
+				break;
+			default:
+				statusText = '● ' + status;
+				bgColor = '#6c757d'; // Gray
+		}
+
+		connectionStatus.textContent = statusText;
+		connectionStatus.style.background = bgColor;
+		connectionStatus.style.color = textColor;
+
+		// Show notification for critical statuses
+		if (status === 'failed' || status === 'shutdown' || status === 'error') {
+			statusMessage.textContent = '⚠️ ' + message;
+			statusMessage.style.color = '#dc3545';
+		} else if (status === 'connected' && message === 'Reconnected') {
+			statusMessage.textContent = '✅ Connection restored!';
+			statusMessage.style.color = '#28a745';
+			// Clear message after 5 seconds
+			setTimeout(function () {
+				statusMessage.textContent = '';
+			}, 5000);
+		}
+	};
+
+	// Handle microphone errors
+	window.onMicrophoneError = function (errorMessage) {
+		statusMessage.textContent = '⚠️ ' + errorMessage;
+		statusMessage.style.color = '#dc3545';
+		// Re-show start button so user can try again
+		document.getElementById("startBtn").style.display = 'inline-block';
+	};
+
 	// Room management UI
 	var currentRoom = null;
 	var roomNameInput = document.getElementById("roomName");
