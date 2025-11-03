@@ -13,6 +13,7 @@ var myBitRate = VoipConfig.audio.bitRate; //8,16,32 - outgoing bitrate
 var myMinGain = VoipConfig.audio.minGain; //min Audiolvl
 var micAccessAllowed = false; //Is set to true if user granted access
 var chunkSize = VoipConfig.audio.chunkSize;
+var isMicMuted = false; //Mute state
 
 var downSampleWorker = new Worker('./js/voipWorker.js');
 var upSampleWorker = new Worker('./js/voipWorker.js');
@@ -131,7 +132,7 @@ socketIO.on('server-shutdown', function (data) {
 });
 
 downSampleWorker.addEventListener('message', function (e) {
-	if (socketConnected) {
+	if (socketConnected && !isMicMuted) {
 		var data = e.data;
 		var audioData = onMicCompressedAudio(data[0].buffer, mySampleRate, myBitRate)
 		socketIO.emit("d",
@@ -316,4 +317,10 @@ var onUserCompressedAudio = function (audioData, userId, sampleRate, bitRate) { 
 
 var onUserDecompressedAudio = function (audioData, userId, sampleRate) { //Called when user audiodata coming from the client
 	return audioData;
+}
+
+// Mute/Unmute functionality
+function toggleMute(muted) {
+	isMicMuted = muted;
+	console.log('Microphone ' + (muted ? 'muted' : 'unmuted'));
 }

@@ -337,6 +337,58 @@ network: {
 }
 ```
 
+# User Controls
+
+The application provides intuitive controls for managing your audio during conversations:
+
+## Mute/Unmute Control
+
+- **Mute Button**: Click the "🔇 Mute" button to stop transmitting your audio
+- **Unmute Button**: When muted, the button changes to "🔊 Unmute" - click to resume transmission
+- **Visual Feedback**: The button changes color (yellow → red) to clearly indicate mute status
+- **Audio Level**: Your microphone level meter turns gray when muted
+
+### How to Use
+
+1. Join a room and click "Start Talking"
+2. Click "🔇 Mute" to mute your microphone (others won't hear you)
+3. Click "🔊 Unmute" to unmute and resume speaking
+4. Your audio continues to be processed locally even when muted
+
+### Use Cases
+
+- **Quick Privacy**: Mute during coughs, background noise, or private conversations
+- **Push-to-Talk Alternative**: Stay muted by default, unmute only when speaking
+- **Multi-tasking**: Mute when you need to step away from the conversation
+
+## Visual Audio Level Indicators
+
+Real-time audio level meters show the strength of audio signals:
+
+### Microphone Level Meter (Your Audio)
+- **Blue gradient bar**: Shows your microphone input level in real-time
+- **Percentage display**: Numerical indicator (0-100%) shows exact audio level
+- **Pulse animation**: Bar pulses when you're speaking (level > 5%)
+- **Muted state**: Turns gray when microphone is muted
+- **Color coding**:
+  - Active (speaking): Bright blue with glow effect
+  - Idle (silent): Minimal width
+  - Muted: Gray
+
+### Incoming Audio Level Meter
+- **Green gradient bar**: Shows incoming audio from other users
+- **Percentage display**: Numerical indicator (0-100%) shows exact audio level
+- **Pulse animation**: Bar pulses when receiving audio (level > 5%)
+- **Real-time feedback**: Instantly shows when others are speaking
+
+### Benefits
+
+- **Audio Confirmation**: Verify your microphone is working before speaking
+- **Optimal Positioning**: Adjust your distance from the microphone for best levels
+- **Troubleshooting**: Quickly identify if there's an audio problem
+- **Speaking Awareness**: See when others are talking (even with low volume)
+- **Professional Feel**: Visual feedback creates a more polished user experience
+
 # Roadmap
 * ✅ Improved sound quality with configurable audio settings
 * ✅ Room/channel support for multi-room conversations
@@ -346,9 +398,11 @@ network: {
 * ✅ Echo cancellation using browser's built-in AEC
 * ✅ Advanced noise suppression with custom noise gate
 * ✅ Automatic gain control for consistent audio levels
+* ✅ User mute/unmute controls with visual feedback
+* ✅ Visual audio level indicators with real-time metering
 * Add Opus codec support (foundation laid with @geut/opus library)
-* Add user mute/unmute controls
-* Add visual audio level indicators
+* Add recording functionality
+* Add user list with individual volume controls
 
 # Audiopipeline Details
 
